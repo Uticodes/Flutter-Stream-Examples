@@ -21,6 +21,19 @@ class _MyAppState extends State<MyApp> {
   final StreamController _streamController = StreamController();
 
   @override
+  void initState() {
+    addData();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    //the warning close instances of dart.core.Sink will not clear until you add this function
+    _streamController.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Stream Example',
@@ -58,7 +71,7 @@ class _MyAppState extends State<MyApp> {
                     child: Text("Emit Value: "),
                     color: Colors.blue[200],
                     onPressed: () {
-                      _controller.add(12);
+                      _controller.add(10);
                     }),
                 MaterialButton(
                     child: Text("Emit Value: "),
@@ -117,7 +130,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Stream<int> numberStream() async* {
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; i <= 20; i++) {
       await Future.delayed(Duration(seconds: 1));
 
       yield i;
