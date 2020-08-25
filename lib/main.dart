@@ -16,8 +16,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  StreamController<double> _controller = StreamController();
+  StreamController<double> _controller = StreamController<double>.broadcast();
   StreamSubscription<double> _streamSubscription;
+  final StreamController _streamController = StreamController();
 
   @override
   Widget build(BuildContext context) {
@@ -25,45 +26,68 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Stream Example',
       home: Scaffold(
           body: Center(
-        child: Row(
-          children: <Widget>[
-            MaterialButton(
-                child: Text("Subscribe: "),
-                color: Colors.yellow[200],
-                //for Future onPress
-                onPressed: () async {
-                  //stream the controller manages
-                  var value1 = await getDelayedRandomValue();
-                  var value2 = await getDelayedRandomValue();
-                }
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              //mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                MaterialButton(
+                    child: Text("Subscribe: "),
+                    color: Colors.yellow[200],
+                    //for Future onPress
+                    /*onPressed: () async {
+                      //stream the controller manages
+                      var value1 = await getDelayedRandomValue();
+                      var value2 = await getDelayedRandomValue();
+                    }*/
 
-                /*onPressed: () {
-                  //stream the controller manages
-                  getDelayeddRandomValue().listen((value) {
-                    print("Value from the controller: $value");
-                  });
-                  */ /*getDelayedRandomValue().listen((value) {
-                    print("Value from the controller: $value");
-                  });*/ /*
+                    onPressed: () {
+                      //stream the controller manages
+                      /* getDelayeddRandomValue().listen((value) {
+                        print("Value from the controller: $value");
+                      });*/
 
-                  */ /*Stream stream = _controller.stream;
-                  _streamSubscription = stream.listen((value) {
-                    print("Value from the controller: $value");
-                  });*/ /*
-                }*/
+                      Stream stream = _controller.stream;
+                      _streamSubscription = stream.listen((value) {
+                        print("Value from the controller: $value");
+                      });
+                    }),
+                MaterialButton(
+                    child: Text("Emit Value: "),
+                    color: Colors.blue[200],
+                    onPressed: () {
+                      _controller.add(12);
+                    }),
+                MaterialButton(
+                    child: Text("Emit Value: "),
+                    color: Colors.green[200],
+                    onPressed: () {
+                      _streamSubscription?.cancel();
+                    })
+              ],
+            ),
+            Row(
+              //mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                StreamBuilder(
+                  stream: numberStream().map((number) => "number $number"),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError)
+                      return Text("hey there is some error");
+                    else if (snapshot.connectionState ==
+                        ConnectionState.waiting)
+                      return CircularProgressIndicator();
+                    return Text(
+                      "${snapshot.data}",
+                      style: Theme.of(context).textTheme.display1,
+                    );
+                  },
                 ),
-            MaterialButton(
-                child: Text("Emit Value: "),
-                color: Colors.blue[200],
-                onPressed: () {
-                  _controller.add(12);
-                }),
-            MaterialButton(
-                child: Text("Emit Value: "),
-                color: Colors.green[200],
-                onPressed: () {
-                  _streamSubscription.cancel();
-                })
+              ],
+            ),
           ],
         ),
       )),
@@ -81,6 +105,22 @@ class _MyAppState extends State<MyApp> {
     while (true) {
       await Future.delayed(Duration(seconds: 1));
       yield random.nextDouble();
+    }
+  }
+
+  addData() async {
+    for (int i = 1; i <= 10; i++) {
+      await Future.delayed(Duration(seconds: 1));
+
+      _streamController.sink.add(i);
+    }
+  }
+
+  Stream<int> numberStream() async* {
+    for (int i = 1; i <= 10; i++) {
+      await Future.delayed(Duration(seconds: 1));
+
+      yield i;
     }
   }
 }
